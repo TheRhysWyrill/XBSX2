@@ -7,9 +7,6 @@ on:
     branches:
       - uwp
 
-env: 
-  verion: $env:GITHUB_OUTPUT
-
 jobs:
   build:
     runs-on: windows-latest
@@ -78,7 +75,7 @@ jobs:
     name: Publish Release
     if: github.ref == 'refs/heads/uwp'
     permissions: write-all
-    runs-on: ubuntu-22.04
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
