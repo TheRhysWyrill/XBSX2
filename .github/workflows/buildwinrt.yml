@@ -35,7 +35,6 @@ jobs:
     - name: Echo the GitHub Env for File Names
       run: |
         echo "${{ steps.extract_version.outputs.version }}"
-
     - name: Restore NuGet packages
       run: nuget restore PCSX2_qt.sln
 
@@ -44,7 +43,6 @@ jobs:
       run: |
         cd bin/resources
         aria2c -Z "https://github.com/PCSX2/pcsx2_patches/releases/tag/latest/download/patches.zip"
-
     - name: Download Dependencies
       shell: cmd
       run: |
@@ -61,14 +59,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: appx-${{ matrix.configuration }}
-        path: "xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx"
+        path: "AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Test/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx"
         
     - name: Upload APPX file (AVX2)
       if: matrix.configuration == 'Release AVX2'
       uses: actions/upload-artifact@v4
       with:
         name: appx-${{ matrix.configuration }}
-        path: "xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx"
+        path: "AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2_Test/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx"
   
   Publish-release:
     needs: build
@@ -95,7 +93,7 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4.1.7
         with:
-          path: ./artifacts/
+          path: ./AppPackages/xbsx2/
           
       - name: Create a new release
         uses: marvinpinto/action-automatic-releases@latest
@@ -105,5 +103,5 @@ jobs:
           prerelease: false
           title: Latest XBSX2 Builds
           files: | 
-            ./XBSX2/XBSX2/artifacts/appx-Release/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
-            ./XBSX2/XBSX2/artifacts/appx-Release AVX2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx
+            ./appx-Release/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
+            ./appx-Release AVX2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx
