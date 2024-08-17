@@ -61,14 +61,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: appx-${{ matrix.configuration }}
-        path: "AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Test/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx"
+        path: "xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx"
         
     - name: Upload APPX file (AVX2)
       if: matrix.configuration == 'Release AVX2'
       uses: actions/upload-artifact@v4
       with:
         name: appx-${{ matrix.configuration }}
-        path: "AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2_Test/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx"
+        path: "xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx"
   
   Publish-release:
     needs: build
