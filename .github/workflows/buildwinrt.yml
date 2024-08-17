@@ -7,6 +7,9 @@ on:
     branches:
       - uwp
 
+env: 
+  verion: $env:GITHUB_OUTPUT
+
 jobs:
   build:
     runs-on: windows-latest
