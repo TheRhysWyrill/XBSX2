@@ -77,26 +77,11 @@ jobs:
     permissions: write-all
     runs-on: windows-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Extract version string from AppxManifest
-        id: extract_version
-        run: |
-          $manifest = [xml](Get-Content pcsx2-winrt\Package.appxmanifest)
-          $version = $manifest.Package.Identity.Version
-          echo $version
-          echo version=$version >> $env:GITHUB_OUTPUT
-        
-      - name: Echo the GitHub Env for File Names
-        run: |
-          echo "${{ steps.extract_version.outputs.version }}"
-      
+    steps:      
       - name: Download Artifacts
         uses: actions/download-artifact@v4.1.7
         with:
-          path: ./XBSX2/XBSX2/artifacts/
+          path: ./artifacts/
           
       - name: Create a new release
         uses: marvinpinto/action-automatic-releases@latest
