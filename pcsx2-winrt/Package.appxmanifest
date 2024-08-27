@@ -3,7 +3,7 @@
   <Identity
     Name="XBSX2"
     Publisher="CN=Stern"
-    Version="2.0.8.1" />
+    Version="2.0.8.2" />
   <mp:PhoneIdentity PhoneProductId="595c25f0-b370-4d7a-9b14-3027fbd69ecf" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
   <Properties>
     <DisplayName>pcsx2-winrt</DisplayName>
