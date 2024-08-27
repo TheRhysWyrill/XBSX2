@@ -104,5 +104,5 @@ jobs:
           prerelease: false
           title: Latest XBSX2 Builds
           files: | 
-            ./artifacts/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
-            ./artifacts/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx
+            ./artifacts/appx-Release/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
+            ./artifacts/appx-Release AVX2/*_x64_Release AVX2.appx
