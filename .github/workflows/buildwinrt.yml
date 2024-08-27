@@ -55,10 +55,15 @@ jobs:
       run: | 
         msbuild PCSX2_qt.sln /m /p:PlatformToolset=v143 /p:AppxBundle=Always /t:Restore,Rebuild /p:Configuration="${{ matrix.configuration }}" /p:Platform=x64 /t:restore,build /p:RestorePackagesConfig=true
 
-    - name: Grab AppX package
+    - name: Grab AppX package SSE4
       shell: cmd
       run: >
-        cd AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Test && copy /B *x64.appx ..\..\xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx && cd AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2_Test && copy /B *x64.appx ..\..\xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx 
+        cd AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Test && copy /B *x64.appx ..\..\xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
+
+    - name: Grab AppX package AVX2
+      shell: cmd
+      run: > 
+        cd AppPackages/xbsx2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2_Test && copy /B *x64.appx ..\..\xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx 
         
     - name: Upload APPX file (SSE4)
       if: matrix.configuration == 'Release'
