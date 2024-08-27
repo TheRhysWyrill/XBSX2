@@ -101,8 +101,8 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{ steps.extract_version.outputs.version }}
-          prerelease: false
+          automatic_release_tag: v${{ steps.extract_version.outputs.version }}
+          prerelease: true
           title: ${{ steps.extract_version.outputs.version }} Builds
           files: | 
             ./artifacts/appx-Release/*_x64.appx
