@@ -3,7 +3,7 @@
   <Identity
     Name="XBSX2"
     Publisher="CN=Stern"
-    Version="2.0.8.0" />
+    Version="2.0.8.1" />
   <mp:PhoneIdentity PhoneProductId="595c25f0-b370-4d7a-9b14-3027fbd69ecf" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
   <Properties>
     <DisplayName>pcsx2-winrt</DisplayName>
@@ -18,7 +18,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="pcsx2_winrt.App">
-      <uap:VisualElements DisplayName="XBSX2.0" Description="PCSX2 for UWP/Xbox."
+      <uap:VisualElements DisplayName="XBSX2" Description="PCSX2 for UWP/Xbox."
         Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" BackgroundColor="transparent">
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
         <uap:DefaultTile/>
@@ -37,5 +37,6 @@
     <Capability Name="internetClient" />
     <Capability Name="codeGeneration"/>
     <uap:Capability Name="removableStorage"/>
+	<Capability Name="internetClientServer"/>
   </Capabilities>
 </Package>

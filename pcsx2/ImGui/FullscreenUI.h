@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2002-2023 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
+// SPDX-License-Identifier: GPL-3.0+
 
 #pragma once
 
@@ -60,3 +60,6 @@ namespace Host
 	void OnCoverDownloaderOpenRequested();
 	void OnCreateMemoryCardOpenRequested();
 } // namespace Host
+
+// Change this to change the version in the about screen.
+#define APP_VERSION "2.0.8.1"

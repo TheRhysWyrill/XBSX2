@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "GS/Renderers/OpenGL/GLContext.h"
 #include "GS/Renderers/OpenGL/GSDeviceOGL.h"
@@ -2088,9 +2088,9 @@ bool GSDeviceOGL::CreateImGuiProgram()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, pos));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, uv));
-	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, col));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, pos));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, uv));
+	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, col));
 
 	glBindVertexArray(GLState::vao);
 	return true;
@@ -2612,21 +2612,21 @@ void GSDeviceOGL::RenderHW(GSHWDrawConfig& config)
 
 	SendHWDraw(config, psel.ps.IsFeedbackLoop());
 
-	if (config.blend_second_pass.enable)
+	if (config.blend_multi_pass.enable)
 	{
 		if (config.blend.IsEffective(config.colormask))
 		{
-			OMSetBlendState(config.blend_second_pass.blend.enable, s_gl_blend_factors[config.blend_second_pass.blend.src_factor],
-				s_gl_blend_factors[config.blend_second_pass.blend.dst_factor], s_gl_blend_ops[config.blend_second_pass.blend.op],
-				s_gl_blend_factors[config.blend_second_pass.blend.src_factor_alpha], s_gl_blend_factors[config.blend_second_pass.blend.dst_factor_alpha],
-				config.blend_second_pass.blend.constant_enable, config.blend_second_pass.blend.constant);
+			OMSetBlendState(config.blend_multi_pass.blend.enable, s_gl_blend_factors[config.blend_multi_pass.blend.src_factor],
+				s_gl_blend_factors[config.blend_multi_pass.blend.dst_factor], s_gl_blend_ops[config.blend_multi_pass.blend.op],
+				s_gl_blend_factors[config.blend_multi_pass.blend.src_factor_alpha], s_gl_blend_factors[config.blend_multi_pass.blend.dst_factor_alpha],
+				config.blend_multi_pass.blend.constant_enable, config.blend_multi_pass.blend.constant);
 		}
 		else
 		{
 			OMSetBlendState();
 		}
-		psel.ps.blend_hw = config.blend_second_pass.blend_hw;
-		psel.ps.dither = config.blend_second_pass.dither;
+		psel.ps.blend_hw = config.blend_multi_pass.blend_hw;
+		psel.ps.dither = config.blend_multi_pass.dither;
 		SetupPipeline(psel);
 		SendHWDraw(config, psel.ps.IsFeedbackLoop());
 	}

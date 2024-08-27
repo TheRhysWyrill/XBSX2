@@ -379,8 +379,7 @@ set(pcsx2USBSources
 	USB/usb-lightgun/guncon2.cpp
 	USB/usb-mic/audiodev-cubeb.cpp
 	USB/usb-mic/usb-headset.cpp
-	USB/usb-mic/usb-mic-logitech.cpp
-	USB/usb-mic/usb-mic-singstar.cpp
+	USB/usb-mic/usb-mic.cpp
 	USB/usb-msd/usb-msd.cpp
 	USB/usb-pad/lg/lg_ff.cpp
 	USB/usb-pad/usb-buzz.cpp
@@ -418,7 +417,7 @@ set(pcsx2USBHeaders
 	USB/usb-mic/audiodev-noop.h
 	USB/usb-mic/audiodev.h
 	USB/usb-mic/usb-headset.h
-	USB/usb-mic/usb-mic-singstar.h
+	USB/usb-mic/usb-mic.h
 	USB/usb-msd/usb-msd.h
 	USB/usb-pad/lg/lg_ff.h
 	USB/usb-pad/usb-buzz.h
@@ -436,6 +435,8 @@ set(pcsx2PADSources
 	SIO/Pad/PadBase.cpp
 	SIO/Pad/PadDualshock2.cpp
 	SIO/Pad/PadGuitar.cpp
+	SIO/Pad/PadJogcon.cpp
+	SIO/Pad/PadNegcon.cpp
 	SIO/Pad/PadPopn.cpp
 	SIO/Pad/PadNotConnected.cpp
 )
@@ -444,6 +445,8 @@ set(pcsx2PADHeaders
 	SIO/Pad/PadBase.h
 	SIO/Pad/PadDualshock2.h
 	SIO/Pad/PadGuitar.h
+	SIO/Pad/PadJogcon.h
+	SIO/Pad/PadNegcon.h
 	SIO/Pad/PadPopn.h
 	SIO/Pad/PadNotConnected.h
 	SIO/Pad/PadTypes.h
@@ -1276,6 +1279,16 @@ function(setup_main_executable target)
 		get_target_property(WINDEPLOYQT_EXE Qt6::windeployqt IMPORTED_LOCATION)
 		install(CODE "execute_process(COMMAND \"${WINDEPLOYQT_EXE}\" \"${CMAKE_SOURCE_DIR}/bin/$<TARGET_FILE_NAME:${target}>\" --plugindir \"${CMAKE_SOURCE_DIR}/bin/QtPlugins\" --no-compiler-runtime --no-system-d3d-compiler --no-system-dxc-compiler --no-translations COMMAND_ERROR_IS_FATAL ANY)")
 		install(CODE "file(WRITE \"${CMAKE_SOURCE_DIR}/bin/qt.conf\" \"[Paths]\\nPlugins = ./QtPlugins\")")
+	endif()
+
+
+	if (UNIX AND NOT APPLE)
+		if (PACKAGE_MODE)
+			install(TARGETS pcsx2-qt DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+			install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin/resources DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/PCSX2)
+		else()
+			install(TARGETS pcsx2-qt DESTINATION ${CMAKE_SOURCE_DIR}/bin)
+		endif()
 	endif()
 
 	if(APPLE)

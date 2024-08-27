@@ -1,11 +1,13 @@
-// SPDX-FileCopyrightText: 2002-2023 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "Host.h"
 #include "Input/InputManager.h"
 #include "SIO/Pad/Pad.h"
 #include "SIO/Pad/PadDualshock2.h"
 #include "SIO/Pad/PadGuitar.h"
+#include "SIO/Pad/PadJogcon.h"
+#include "SIO/Pad/PadNegcon.h"
 #include "SIO/Pad/PadPopn.h"
 #include "SIO/Pad/PadNotConnected.h"
 #include "SIO/Sio.h"
@@ -243,7 +245,7 @@ void Pad::SetDefaultHotkeyConfig(SettingsInterface& si)
 	//	si.SetStringValue("Hotkeys", "IncreaseSpeed", "Keyboard"); TBD
 	//  si.SetStringValue("Hotkeys", "ResetVM", "Keyboard"); TBD
 	//  si.SetStringValue("Hotkeys", "ShutdownVM", "Keyboard"); TBD
-	si.SetStringValue("Hotkeys", "OpenPauseMenu", "Keyboard/Escape");
+	si.SetStringValue("Hotkeys", "OpenPauseMenu", "XInput-0/LeftStick & XInput-0/RightStick");
 	si.SetStringValue("Hotkeys", "ToggleFrameLimit", "Keyboard/F4");
 	si.SetStringValue("Hotkeys", "TogglePause", "Keyboard/Space");
 	si.SetStringValue("Hotkeys", "ToggleSlowMotion", "Keyboard/Shift & Keyboard/Backtab");
@@ -255,6 +257,8 @@ static const Pad::ControllerInfo* s_controller_info[] = {
 	&PadNotConnected::ControllerInfo,
 	&PadDualshock2::ControllerInfo,
 	&PadGuitar::ControllerInfo,
+	&PadJogcon::ControllerInfo,
+	&PadNegcon::ControllerInfo,
 	&PadPopn::ControllerInfo,
 };
 
@@ -469,7 +473,8 @@ std::vector<std::string> Pad::GetInputProfileNames()
 {
 	FileSystem::FindResultsArray results;
 	FileSystem::FindFiles(EmuFolders::InputProfiles.c_str(), "*.ini",
-		FILESYSTEM_FIND_FILES | FILESYSTEM_FIND_HIDDEN_FILES | FILESYSTEM_FIND_RELATIVE_PATHS,
+		FILESYSTEM_FIND_FILES | FILESYSTEM_FIND_HIDDEN_FILES | FILESYSTEM_FIND_RELATIVE_PATHS |
+			FILESYSTEM_FIND_SORT_BY_NAME,
 		&results);
 
 	std::vector<std::string> ret;
@@ -494,6 +499,12 @@ PadBase* Pad::CreatePad(u8 unifiedSlot, ControllerType controllerType, size_t ej
 			break;
 		case ControllerType::Guitar:
 			s_controllers[unifiedSlot] = std::make_unique<PadGuitar>(unifiedSlot, ejectTicks);
+			break;
+		case ControllerType::Jogcon:
+			s_controllers[unifiedSlot] = std::make_unique<PadJogcon>(unifiedSlot, ejectTicks);
+			break;
+		case ControllerType::Negcon:
+			s_controllers[unifiedSlot] = std::make_unique<PadNegcon>(unifiedSlot, ejectTicks);
 			break;
 		case ControllerType::Popn:
 			s_controllers[unifiedSlot] = std::make_unique<PadPopn>(unifiedSlot, ejectTicks);

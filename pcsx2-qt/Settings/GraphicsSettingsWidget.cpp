@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "GraphicsSettingsWidget.h"
 #include "QtUtils.h"
@@ -113,7 +113,8 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 	// OSD Settings
 	//////////////////////////////////////////////////////////////////////////
 	SettingWidgetBinder::BindWidgetToFloatSetting(sif, m_ui.osdScale, "EmuCore/GS", "OsdScale", 100.0f);
-	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowMessages, "EmuCore/GS", "OsdShowMessages", true);
+	SettingWidgetBinder::BindWidgetToIntSetting(sif, m_ui.osdMessagesPos, "EmuCore/GS", "OsdMessagesPos", static_cast<int>(OsdOverlayPos::TopLeft));
+	SettingWidgetBinder::BindWidgetToIntSetting(sif, m_ui.osdPerformancePos, "EmuCore/GS", "OsdPerformancePos", static_cast<int>(OsdOverlayPos::TopRight));
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowSpeed, "EmuCore/GS", "OsdShowSpeed", false);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowFPS, "EmuCore/GS", "OsdShowFPS", false);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowCPU, "EmuCore/GS", "OsdShowCPU", false);
@@ -125,6 +126,9 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowInputs, "EmuCore/GS", "OsdShowInputs", false);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowFrameTimes, "EmuCore/GS", "OsdShowFrameTimes", false);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowVersion, "EmuCore/GS", "OsdShowVersion", false);
+	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowHardwareInfo, "EmuCore/GS", "OsdShowHardwareInfo", false);
+	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowVideoCapture, "EmuCore/GS", "OsdShowVideoCapture", true);
+	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.osdShowInputRec, "EmuCore/GS", "OsdShowInputRec", true);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.warnAboutUnsafeSettings, "EmuCore", "WarnAboutUnsafeSettings", true);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.fxaa, "EmuCore/GS", "fxaa", false);
 	SettingWidgetBinder::BindWidgetToBoolSetting(sif, m_ui.shadeBoost, "EmuCore/GS", "ShadeBoost", false);
@@ -137,6 +141,10 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 
 	connect(m_ui.shadeBoost, &QCheckBox::checkStateChanged, this, &GraphicsSettingsWidget::onShadeBoostChanged);
 	onShadeBoostChanged();
+	connect(m_ui.osdMessagesPos, &QComboBox::currentIndexChanged, this, &GraphicsSettingsWidget::onMessagesPosChanged);
+	connect(m_ui.osdPerformancePos, &QComboBox::currentIndexChanged, this, &GraphicsSettingsWidget::onPerformancePosChanged);
+	onMessagesPosChanged();
+	onPerformancePosChanged();
 
 	//////////////////////////////////////////////////////////////////////////
 	// HW Settings
@@ -329,7 +337,7 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 		m_ui.displayGridLayout->removeWidget(m_ui.widescreenPatches);
 		m_ui.displayGridLayout->removeWidget(m_ui.noInterlacingPatches);
 		safe_delete(m_ui.widescreenPatches);
-		safe_delete(m_ui.noInterlacingPatches);		
+		safe_delete(m_ui.noInterlacingPatches);
 	}
 
 	// Hide advanced options by default.
@@ -441,7 +449,9 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 			tr("Enables the option to show the overscan area on games which draw more than the safe area of the screen."));
 
 		dialog->registerWidgetHelp(
-			m_ui.fmvAspectRatio, tr("FMV Aspect Ratio"), tr("Off (Default)"), tr("Overrides the full-motion video (FMV) aspect ratio."));
+			m_ui.fmvAspectRatio, tr("FMV Aspect Ratio Override"), tr("Off (Default)"),
+			tr("Overrides the full-motion video (FMV) aspect ratio. "
+			   "If disabled, the FMV Aspect Ratio will match the same value as the general Aspect Ratio setting."));
 
 		dialog->registerWidgetHelp(m_ui.PCRTCAntiBlur, tr("Anti-Blur"), tr("Checked"),
 			tr("Enables internal Anti-Blur hacks. Less accurate to PS2 rendering but will make a lot of games look less blurry."));
@@ -499,10 +509,18 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 			m_ui.mipmapping, tr("Mipmapping"), tr("Checked"), tr("Enables mipmapping, which some games require to render correctly."));
 
 		dialog->registerWidgetHelp(
-			m_ui.textureFiltering, tr("Texture Filtering"), tr("Bilinear (PS2)"), tr("Control the texture filtering of the emulation."));
+			m_ui.textureFiltering, tr("Texture Filtering"), tr("Bilinear (PS2)"),
+			tr("Changes what filtering algorithm is used to map textures to surfaces.<br> "
+			   "Nearest: Makes no attempt to blend colors.<br> "
+			   "Bilinear (Forced): Will blend colors together to remove harsh edges between different colored pixels even if the game told the PS2 not to.<br> "
+			   "Bilinear (PS2): Will apply filtering to all surfaces that a game instructs the PS2 to filter.<br> "
+			   "Bilinear (Forced Excluding Sprites): Will apply filtering to all surfaces, even if the game told the PS2 not to, except sprites."));
 
 		dialog->registerWidgetHelp(m_ui.trilinearFiltering, tr("Trilinear Filtering"), tr("Automatic (Default)"),
-			tr("Control the texture's trilinear filtering of the emulation."));
+			tr("Reduces blurriness of large textures applied to small, steeply angled surfaces by sampling colors from the two nearest Mipmaps. Requires Mipmapping to be 'on'.<br> "
+			   "Off: Disables the feature.<br> "
+			   "Trilinear (PS2): Applies Trilinear filtering to all surfaces that a game instructs the PS2 to.<br> "
+			   "Trilinear (Forced): Applies Trilinear filtering to all surfaces, even if the game told the PS2 not to."));
 
 		dialog->registerWidgetHelp(m_ui.anisotropicFiltering, tr("Anisotropic Filtering"), tr("Off (Default)"),
 			tr("Reduces texture aliasing at extreme viewing angles."));
@@ -556,13 +574,13 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 
 	// Hardware Fixes tab
 	{
-		dialog->registerWidgetHelp(m_ui.cpuSpriteRenderBW, tr("CPU Sprite Render Size"), tr("0 (Disabled)"), 
+		dialog->registerWidgetHelp(m_ui.cpuSpriteRenderBW, tr("CPU Sprite Render Size"), tr("0 (Disabled)"),
 			tr("The maximum target memory width that will allow the CPU Sprite Renderer to activate on."));
 
-		dialog->registerWidgetHelp(m_ui.cpuCLUTRender, tr("Software CLUT Render"), tr("0 (Disabled)"), 
+		dialog->registerWidgetHelp(m_ui.cpuCLUTRender, tr("Software CLUT Render"), tr("0 (Disabled)"),
 			tr("Tries to detect when a game is drawing its own color palette and then renders it in software, instead of on the GPU."));
 
-		dialog->registerWidgetHelp(m_ui.gpuTargetCLUTMode, tr("GPU Target CLUT"), tr("Disabled"), 
+		dialog->registerWidgetHelp(m_ui.gpuTargetCLUTMode, tr("GPU Target CLUT"), tr("Disabled"),
 			tr("Try to detect when a game is drawing its own color palette and then renders it on the GPU with special handling."));
 
 		dialog->registerWidgetHelp(m_ui.skipDrawStart, tr("Skipdraw Range Start"), tr("0"),
@@ -691,9 +709,12 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 	{
 		dialog->registerWidgetHelp(m_ui.osdScale, tr("OSD Scale"), tr("100%"), tr("Scales the size of the onscreen OSD from 50% to 500%."));
 
-		dialog->registerWidgetHelp(m_ui.osdShowMessages, tr("Show OSD Messages"), tr("Checked"),
+		dialog->registerWidgetHelp(m_ui.osdMessagesPos, tr("OSD Messages Position"), tr("Left (Default)"),
 			tr("Shows on-screen-display messages when events occur such as save states being "
 			   "created/loaded, screenshots being taken, etc."));
+
+		dialog->registerWidgetHelp(m_ui.osdPerformancePos, tr("OSD Statistics Position"), tr("Right (Default)"),
+			tr("Shows a variety of on-screen performance data points as selected by the user."));
 
 		dialog->registerWidgetHelp(m_ui.osdShowFPS, tr("Show FPS"), tr("Unchecked"),
 			tr("Shows the internal frame rate of the game in the top-right corner of the display."));
@@ -720,11 +741,20 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 		dialog->registerWidgetHelp(m_ui.osdShowInputs, tr("Show Inputs"), tr("Unchecked"),
 			tr("Shows the current controller state of the system in the bottom-left corner of the display."));
 
-		dialog->registerWidgetHelp(m_ui.osdShowFrameTimes, tr("Show Frame Times"), tr("Unchecked"), 
+		dialog->registerWidgetHelp(m_ui.osdShowFrameTimes, tr("Show Frame Times"), tr("Unchecked"),
 			tr("Displays a graph showing the average frametimes."));
-		
+
 		dialog->registerWidgetHelp(m_ui.osdShowVersion, tr("Show PCSX2 Version"), tr("Unchecked"),
-			tr("Shows the current PCSX2 version on the top-right corner of the display"));
+			tr("Shows the current PCSX2 version on the top-right corner of the display."));
+
+		dialog->registerWidgetHelp(m_ui.osdShowVideoCapture, tr("Show Video Capture Status"), tr("Checked"),
+			tr("Shows the currently active video capture status."));
+
+		dialog->registerWidgetHelp(m_ui.osdShowInputRec, tr("Show Input Recording Status"), tr("Checked"),
+			tr("Shows the currently active input recording status."));
+
+		dialog->registerWidgetHelp(m_ui.osdShowHardwareInfo, tr("Show Hardware Info"), tr("Unchecked"),
+			tr("Shows the current system hardware information on the OSD."));
 
 		dialog->registerWidgetHelp(m_ui.warnAboutUnsafeSettings, tr("Warn About Unsafe Settings"), tr("Checked"),
 			tr("Displays warnings when settings are enabled which may break games."));
@@ -733,20 +763,20 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 	// Recording tab
 	{
 		dialog->registerWidgetHelp(m_ui.videoCaptureCodec, tr("Video Codec"), tr("Default"), tr("Selects which Video Codec to be used for Video Capture. "
-		
-		"<b>If unsure, leave it on default.<b>"));
+
+																								"<b>If unsure, leave it on default.<b>"));
 
 		dialog->registerWidgetHelp(m_ui.videoCaptureFormat, tr("Video Format"), tr("Default"), tr("Selects which Video Format to be used for Video Capture. If by chance the codec does not support the format, the first format available will be used. "
-		
-		"<b>If unsure, leave it on default.<b>"));
+
+																								  "<b>If unsure, leave it on default.<b>"));
 
 		dialog->registerWidgetHelp(m_ui.videoCaptureBitrate, tr("Video Bitrate"), tr("6000 kbps"), tr("Sets the video bitrate to be used. "
-		
-		"Larger bitrate generally yields better video quality at the cost of larger resulting file size."));
+
+																									  "Larger bitrate generally yields better video quality at the cost of larger resulting file size."));
 
 		dialog->registerWidgetHelp(m_ui.videoCaptureResolutionAuto, tr("Automatic Resolution"), tr("Unchecked"), tr("When checked, the video capture resolution will follows the internal resolution of the running game.<br><br>"
-		
-		"<b>Be careful when using this setting especially when you are upscaling, as higher internal resolution (above 4x) can results in very large video capture and can cause system overload.</b>"));
+
+																													"<b>Be careful when using this setting especially when you are upscaling, as higher internal resolution (above 4x) can results in very large video capture and can cause system overload.</b>"));
 
 
 		dialog->registerWidgetHelp(m_ui.enableVideoCaptureArguments, tr("Enable Extra Video Arguments"), tr("Unchecked"), tr("Allows you to pass arguments to the selected video codec."));
@@ -757,8 +787,8 @@ GraphicsSettingsWidget::GraphicsSettingsWidget(SettingsWindow* dialog, QWidget* 
 			   "For example: \"crf = 21 : preset = veryfast\""));
 
 		dialog->registerWidgetHelp(m_ui.audioCaptureCodec, tr("Audio Codec"), tr("Default"), tr("Selects which Audio Codec to be used for Video Capture. "
-		
-		"<b>If unsure, leave it on default.<b>"));
+
+																								"<b>If unsure, leave it on default.<b>"));
 
 		dialog->registerWidgetHelp(m_ui.audioCaptureBitrate, tr("Audio Bitrate"), tr("160 kbps"), tr("Sets the audio bitrate to be used."));
 
@@ -884,6 +914,28 @@ void GraphicsSettingsWidget::onShadeBoostChanged()
 	m_ui.shadeBoostBrightness->setEnabled(enabled);
 	m_ui.shadeBoostContrast->setEnabled(enabled);
 	m_ui.shadeBoostSaturation->setEnabled(enabled);
+}
+
+void GraphicsSettingsWidget::onMessagesPosChanged()
+{
+	const bool enabled = m_ui.osdMessagesPos->currentIndex() != (m_dialog->isPerGameSettings() ? 1 : 0);
+
+	m_ui.warnAboutUnsafeSettings->setEnabled(enabled);
+}
+
+void GraphicsSettingsWidget::onPerformancePosChanged()
+{
+	const bool enabled = m_ui.osdPerformancePos->currentIndex() != (m_dialog->isPerGameSettings() ? 1 : 0);
+
+	m_ui.osdShowSpeed->setEnabled(enabled);
+	m_ui.osdShowFPS->setEnabled(enabled);
+	m_ui.osdShowCPU->setEnabled(enabled);
+	m_ui.osdShowGPU->setEnabled(enabled);
+	m_ui.osdShowResolution->setEnabled(enabled);
+	m_ui.osdShowGSStats->setEnabled(enabled);
+	m_ui.osdShowIndicators->setEnabled(enabled);
+	m_ui.osdShowFrameTimes->setEnabled(enabled);
+	m_ui.osdShowVersion->setEnabled(enabled);
 }
 
 void GraphicsSettingsWidget::onTextureDumpChanged()
@@ -1073,7 +1125,7 @@ void GraphicsSettingsWidget::updateRendererDependentOptions()
 	// populate adapters
 	std::vector<GSAdapterInfo> adapters = GSGetAdapterInfo(type);
 	const GSAdapterInfo* current_adapter_info = nullptr;
-	
+
 	// fill+select adapters
 	{
 		QSignalBlocker sb(m_ui.adapterDropdown);
@@ -1216,7 +1268,7 @@ void GraphicsSettingsWidget::populateUpscaleMultipliers(u32 max_upscale_multipli
 		else
 		{
 			m_ui.upscaleMultiplier->setCurrentIndex(0);
-		}		
+		}
 	}
 	else
 	{

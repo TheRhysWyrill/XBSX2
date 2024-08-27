@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #pragma once
 
@@ -304,6 +304,13 @@ enum class AccBlendLevel : u8
 	Maximum,
 };
 
+enum class OsdOverlayPos : u8
+{
+	None,
+	TopLeft,
+	TopRight,
+};
+
 enum class TexturePreloadingLevel : u8
 {
 	Off,
@@ -585,7 +592,7 @@ struct Pcsx2Config
 		static constexpr int DEFAULT_VIDEO_CAPTURE_BITRATE = 6000;
 		static constexpr int DEFAULT_VIDEO_CAPTURE_WIDTH = 640;
 		static constexpr int DEFAULT_VIDEO_CAPTURE_HEIGHT = 480;
-		static constexpr int DEFAULT_AUDIO_CAPTURE_BITRATE = 160;
+		static constexpr int DEFAULT_AUDIO_CAPTURE_BITRATE = 192;
 		static const char* DEFAULT_CAPTURE_CONTAINER;
 
 		union
@@ -610,7 +617,6 @@ struct Pcsx2Config
 					DisableFramebufferFetch : 1,
 					DisableVertexShaderExpand : 1,
 					SkipDuplicateFrames : 1,
-					OsdShowMessages : 1,
 					OsdShowSpeed : 1,
 					OsdShowFPS : 1,
 					OsdShowCPU : 1,
@@ -622,6 +628,9 @@ struct Pcsx2Config
 					OsdShowInputs : 1,
 					OsdShowFrameTimes : 1,
 					OsdShowVersion : 1,
+					OsdShowVideoCapture: 1,
+					OsdShowInputRec : 1,
+					OsdShowHardwareInfo : 1,
 					HWSpinGPUForReadbacks : 1,
 					HWSpinCPUForReadbacks : 1,
 					GPUPaletteConversion : 1,
@@ -677,7 +686,9 @@ struct Pcsx2Config
 		float StretchY = 100.0f;
 		int Crop[4] = {};
 
-		float OsdScale = 200.0;
+		float OsdScale = 200.0f;
+		OsdOverlayPos OsdMessagesPos = OsdOverlayPos::TopLeft;
+		OsdOverlayPos OsdPerformancePos = OsdOverlayPos::TopRight;
 
 		GSRendererType Renderer = GSRendererType::Auto;
 		float UpscaleMultiplier = 3.0f;

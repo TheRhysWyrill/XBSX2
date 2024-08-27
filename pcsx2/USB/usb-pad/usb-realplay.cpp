@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "Host.h"
 #include "Input/InputManager.h"
@@ -216,7 +216,8 @@ namespace usb_pad
 				{
 					case USB_DT_REPORT:
 						ret = sizeof(hid_report_descriptor);
-						memcpy(data, hid_report_descriptor, ret);
+						std::memcpy(data, hid_report_descriptor, ret);
+						p->actual_length = ret;
 						break;
 				}
 				break;

@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "Common.h"
 #include "CDVD/CDVD.h"
@@ -1707,7 +1707,7 @@ void recompileNextInstruction(bool delayslot, bool swapped_delay_slot)
 	g_pCurInstInfo++;
 
 	// pc might be past s_nEndBlock if the last instruction in the block is a DI.
-	if (pc <= s_nEndBlock)
+	if (pc <= s_nEndBlock && (g_pCurInstInfo + (s_nEndBlock - pc) / 4 + 1) <= s_pInstCache + s_nInstCacheSize)
 	{
 		int count;
 		for (u32 i = 0; i < iREGCNT_GPR; ++i)

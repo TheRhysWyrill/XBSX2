@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #pragma once
 
@@ -112,9 +112,18 @@ namespace ImGuiFullscreen
 	void PushResetLayout();
 	void PopResetLayout();
 
-	void QueueResetFocus();
+	enum class FocusResetType : u8
+	{
+		None,
+		PopupOpened,
+		PopupClosed,
+		WindowChanged,
+		Other,
+	};
+	void QueueResetFocus(FocusResetType type);
 	bool ResetFocusHere();
 	bool IsFocusResetQueued();
+	FocusResetType GetQueuedFocusResetType();
 	void ForceKeyNavEnabled();
 
 	bool WantsToCloseMenu();
@@ -158,6 +167,8 @@ namespace ImGuiFullscreen
 	bool MenuHeadingButton(const char* title, const char* value = nullptr, bool enabled = true, bool draw_line = true);
 	bool ActiveButton(const char* title, bool is_active, bool enabled = true, float height = LAYOUT_MENU_BUTTON_HEIGHT_NO_SUMMARY,
 		ImFont* font = g_large_font);
+	bool ActiveButtonWithRightText(const char* title, const char* right_title, bool is_active, bool enabled = true,
+		float height = LAYOUT_MENU_BUTTON_HEIGHT_NO_SUMMARY, ImFont* font = g_large_font);
 	bool MenuButton(const char* title, const char* summary, bool enabled = true, float height = LAYOUT_MENU_BUTTON_HEIGHT,
 		ImFont* font = g_large_font, ImFont* summary_font = g_medium_font);
 	bool MenuButtonWithoutSummary(const char* title, bool enabled = true, float height = LAYOUT_MENU_BUTTON_HEIGHT_NO_SUMMARY,

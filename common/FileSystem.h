@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #pragma once
 
@@ -39,6 +39,7 @@ enum FILESYSTEM_FIND_FLAGS
 	FILESYSTEM_FIND_FOLDERS = (1 << 3),
 	FILESYSTEM_FIND_FILES = (1 << 4),
 	FILESYSTEM_FIND_KEEP_ARRAY = (1 << 5),
+	FILESYSTEM_FIND_SORT_BY_NAME = (1 << 6),
 };
 
 struct FILESYSTEM_STAT_DATA

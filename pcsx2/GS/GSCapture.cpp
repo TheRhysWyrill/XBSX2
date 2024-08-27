@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "GS/GSCapture.h"
 #include "GS/GSPng.h"
@@ -27,10 +27,10 @@
 
 // We're using deprecated fields because we're targeting multiple ffmpeg versions.
 #if defined(_MSC_VER)
-#pragma warning(disable:4996) // warning C4996: 'AVCodecContext::channels': was declared deprecated
-#elif defined (__clang__)
+#pragma warning(disable : 4996) // warning C4996: 'AVCodecContext::channels': was declared deprecated
+#elif defined(__clang__)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined (__GNUC__)
+#elif defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
@@ -293,14 +293,14 @@ bool GSCapture::LoadFFmpeg(bool report_errors)
 
 	if (report_errors)
 	{
-		Host::ReportErrorAsync(TRANSLATE_SV("GSCapture","Failed to load FFmpeg"),
-			fmt::format(TRANSLATE_FS("GSCapture","You may be missing one or more files, or are using the incorrect version. This build of PCSX2 requires:\n"
-				"  libavcodec: {}\n"
-				"  libavformat: {}\n"
-				"  libavutil: {}\n"
-				"  libswscale: {}\n"
-				"  libswresample: {}\n\n"
-				"Please see our official documentation for more information."), 
+		Host::ReportErrorAsync(TRANSLATE_SV("GSCapture", "Failed to load FFmpeg"),
+			fmt::format(TRANSLATE_FS("GSCapture", "You may be missing one or more files, or are using the incorrect version. This build of PCSX2 requires:\n"
+												  "  libavcodec: {}\n"
+												  "  libavformat: {}\n"
+												  "  libavutil: {}\n"
+												  "  libswscale: {}\n"
+												  "  libswresample: {}\n\n"
+												  "Please see our official documentation for more information."),
 				LIBAVCODEC_VERSION_MAJOR, LIBAVFORMAT_VERSION_MAJOR, LIBAVUTIL_VERSION_MAJOR,
 				LIBSWSCALE_VERSION_MAJOR, LIBSWRESAMPLE_VERSION_MAJOR));
 	}
@@ -363,7 +363,7 @@ void GSCapture::LogAVError(int errnum, const char* format, ...)
 
 std::string GSCapture::GetCaptureTypeForMessage(bool capture_video, bool capture_audio)
 {
-	return capture_video ? (capture_audio ? "capturing audio and video" : "capturing video") : "capturing audio";
+	return capture_video ? capture_audio ? TRANSLATE("GSCapture", "capturing audio and video") : TRANSLATE("GSCapture", "capturing video") : TRANSLATE("GSCapture", "capturing audio");
 }
 
 bool GSCapture::IsUsingHardwareVideoEncoding()
@@ -831,8 +831,8 @@ bool GSCapture::BeginCapture(float fps, GSVector2i recommendedResolution, float 
 		return false;
 	}
 
-	Host::AddIconOSDMessage("GSCapture", ICON_FA_CAMERA,
-		fmt::format("Starting {} to '{}'.", GetCaptureTypeForMessage(capture_video, capture_audio), Path::GetFileName(s_filename)),
+	Host::AddIconOSDMessage("GSCapture", ICON_FA_VIDEO,
+		fmt::format(TRANSLATE_FS("GSCapture", "Starting {} to '{}'."), GetCaptureTypeForMessage(capture_video, capture_audio), Path::GetFileName(s_filename)),
 		Host::OSD_INFO_DURATION);
 
 	if (capture_audio)
@@ -1247,15 +1247,15 @@ void GSCapture::InternalEndCapture(std::unique_lock<std::mutex>& lock)
 		if (!s_encoding_error)
 		{
 			ProcessAllInFlightFrames(lock);
-			Host::AddIconOSDMessage("GSCapture", ICON_FA_CAMERA,
+			Host::AddIconOSDMessage("GSCapture", ICON_FA_VIDEO_SLASH,
 				fmt::format(
-					"Stopped {} to '{}'.", GetCaptureTypeForMessage(IsCapturingVideo(), IsCapturingAudio()), Path::GetFileName(s_filename)),
+					TRANSLATE_FS("GSCapture", "Stopped {} to '{}'."), GetCaptureTypeForMessage(IsCapturingVideo(), IsCapturingAudio()), Path::GetFileName(s_filename)),
 				Host::OSD_INFO_DURATION);
 		}
 		else
 		{
-			Host::AddIconOSDMessage("GSCapture", ICON_FA_CAMERA,
-				fmt::format("Aborted {} due to encoding error in '{}'.", GetCaptureTypeForMessage(IsCapturingVideo(), IsCapturingAudio()),
+			Host::AddIconOSDMessage("GSCapture", ICON_FA_VIDEO_SLASH,
+				fmt::format(TRANSLATE_FS("GSCapture", "Aborted {} due to encoding error in '{}'."), GetCaptureTypeForMessage(IsCapturingVideo(), IsCapturingAudio()),
 					Path::GetFileName(s_filename)),
 				Host::OSD_INFO_DURATION);
 		}
@@ -1528,7 +1528,7 @@ GSCapture::FormatList GSCapture::GetVideoFormatList(const char* codec)
 	}
 
 	// rawvideo doesn't have a list of formats.
-	if(v_codec->pix_fmts == nullptr)
+	if (v_codec->pix_fmts == nullptr)
 	{
 		Console.Error("(GetVideoFormatList) v_codec->pix_fmts is null.");
 		return ret;

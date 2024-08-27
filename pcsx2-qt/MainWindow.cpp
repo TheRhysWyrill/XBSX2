@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "AboutDialog.h"
 #include "AutoUpdaterDialog.h"
@@ -585,6 +585,10 @@ void MainWindow::quit()
 		while (s_vm_valid)
 			QApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 1);
 	}
+
+	// Big picture might still be active.
+	if (m_display_created)
+		g_emu_thread->stopFullscreenUI();
 
 	// Ensure subwindows are removed before quitting. That way the log window cancelling
 	// the close event won't cancel the quit process.
@@ -1360,7 +1364,7 @@ void MainWindow::onGameListEntryContextMenuRequested(const QPoint& point)
 		{
 			connect(menu.addAction(tr("Check Wiki Page")), &QAction::triggered, [this, entry]() { goToWikiPage(entry); });
 		}
-		
+
 		menu.addSeparator();
 
 		if (!s_vm_valid)

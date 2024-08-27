@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2002-2023 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "Achievements.h"
 #include "CDVD/CDVD.h"
@@ -233,7 +233,7 @@ bool VMManager::PerformEarlyHardwareChecks(const char** error)
 	const size_t runtime_host_page_size = HostSys::GetRuntimePageSize();
 	if (__pagesize != runtime_host_page_size)
 	{
-		*error = "Page size mismatch. This build cannot run on your Mac.\n\n" COMMON_DOWNLOAD_MESSAGE;
+		*error = "Page size mismatch. This build cannot run on your system.\n\n" COMMON_DOWNLOAD_MESSAGE;
 		return false;
 	}
 #endif
@@ -659,11 +659,6 @@ void VMManager::LoadInputBindings(SettingsInterface& si, std::unique_lock<std::m
 			InputManager::ReloadBindings(si, *isi, si);
 			Host::Internal::SetInputSettingsLayer(s_input_settings_interface.get(), lock);
 		}
-	}
-	else if (SettingsInterface* gsi = Host::Internal::GetGameSettingsLayer();
-			 gsi && gsi->GetBoolValue("Pad", "UseGameSettingsForController", false))
-	{
-		InputManager::ReloadBindings(si, *gsi, si);
 	}
 	else
 	{
@@ -2370,8 +2365,7 @@ inline void LogUserPowerPlan()
 }
 #endif
 
-#if 0
-#if defined(__linux__) || defined(_WIN32)
+#if defined(_WIN32)
 void LogGPUCapabilities()
 {
 	Console.WriteLn(Color_StrongBlack, "Graphics Adapters Detected:");
@@ -2484,7 +2478,6 @@ void LogGPUCapabilities()
 #endif
 }
 #endif
-#endif
 
 void VMManager::LogCPUCapabilities()
 {
@@ -2532,7 +2525,7 @@ void VMManager::LogCPUCapabilities()
 	}
 #endif
 
-#if 0
+#if defined(_WIN32)
 	LogGPUCapabilities();
 #endif
 }

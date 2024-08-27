@@ -60,7 +60,7 @@
     <Import Condition="!$(Configuration.Contains(Release))" Project="$(SolutionDir)common\vsprops\IncrementalLinking.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Never</AppxBundle>
@@ -70,6 +70,7 @@
     <PackageCertificateKeyFile>xbsx2_TemporaryKey.pfx</PackageCertificateKeyFile>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+    <AppInstallerUri>https://xboxdev.store/visual-studio/SternXD/XBSX2/latest/</AppInstallerUri>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

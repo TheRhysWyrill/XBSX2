@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "FileSystem.h"
 #include "Error.h"
@@ -1196,7 +1196,7 @@ size_t FileSystem::ReadFileWithProgress(std::FILE* fp, void* dst, size_t length,
 			break;
 
 		const size_t read_size = std::min(length - done, chunk_size);
-		if (std::fread(static_cast<u8*>(dst)+ done, read_size, 1, fp) != 1)
+		if (std::fread(static_cast<u8*>(dst) + done, read_size, 1, fp) != 1)
 		{
 			Error::SetErrno(error, "fread() failed: ", errno);
 			break;
@@ -1460,7 +1460,24 @@ bool FileSystem::FindFiles(const char* path, const char* pattern, u32 flags, Fin
 	}
 
 	// enter the recursive function
-	return (RecursiveFindFiles(path, nullptr, nullptr, pattern, flags, results, visited) > 0);
+	if (RecursiveFindFiles(path, nullptr, nullptr, pattern, flags, results, visited) == 0)
+		return false;
+
+	if (flags & FILESYSTEM_FIND_SORT_BY_NAME)
+	{
+		std::sort(results->begin(), results->end(), [](const FILESYSTEM_FIND_DATA& lhs, const FILESYSTEM_FIND_DATA& rhs) {
+			// directories first
+			if ((lhs.Attributes & FILESYSTEM_FILE_ATTRIBUTE_DIRECTORY) !=
+				(rhs.Attributes & FILESYSTEM_FILE_ATTRIBUTE_DIRECTORY))
+			{
+				return ((lhs.Attributes & FILESYSTEM_FILE_ATTRIBUTE_DIRECTORY) != 0);
+			}
+
+			return (StringUtil::Strcasecmp(lhs.FileName.c_str(), rhs.FileName.c_str()) < 0);
+		});
+	}
+
+	return true;
 }
 
 static void TranslateStat64(struct stat* st, const struct _stat64& st64)
@@ -1945,7 +1962,7 @@ static u32 RecursiveFindFiles(const char* OriginPath, const char* ParentPath, co
 		outData.Attributes = 0;
 
 		struct stat sDir;
-		if (stat(full_path.c_str(), &sDir) < 0)
+		if (lstat(full_path.c_str(), &sDir) < 0)
 			continue;
 
 		if (S_ISDIR(sDir.st_mode))
@@ -2042,7 +2059,24 @@ bool FileSystem::FindFiles(const char* path, const char* pattern, u32 flags, Fin
 	}
 
 	// enter the recursive function
-	return (RecursiveFindFiles(path, nullptr, nullptr, pattern, flags, results, visited) > 0);
+	if (RecursiveFindFiles(path, nullptr, nullptr, pattern, flags, results, visited) == 0)
+		return false;
+
+	if (flags & FILESYSTEM_FIND_SORT_BY_NAME)
+	{
+		std::sort(results->begin(), results->end(), [](const FILESYSTEM_FIND_DATA& lhs, const FILESYSTEM_FIND_DATA& rhs) {
+			// directories first
+			if ((lhs.Attributes & FILESYSTEM_FILE_ATTRIBUTE_DIRECTORY) !=
+				(rhs.Attributes & FILESYSTEM_FILE_ATTRIBUTE_DIRECTORY))
+			{
+				return ((lhs.Attributes & FILESYSTEM_FILE_ATTRIBUTE_DIRECTORY) != 0);
+			}
+
+			return (StringUtil::Strcasecmp(lhs.FileName.c_str(), rhs.FileName.c_str()) < 0);
+		});
+	}
+
+	return true;
 }
 
 bool FileSystem::StatFile(const char* path, struct stat* st)
@@ -2067,7 +2101,7 @@ bool FileSystem::StatFile(const char* path, FILESYSTEM_STAT_DATA* sd)
 
 	// stat file
 	struct stat sysStatData;
-	if (stat(path, &sysStatData) < 0)
+	if (lstat(path, &sysStatData) < 0)
 		return false;
 
 	// parse attributes
@@ -2123,7 +2157,7 @@ bool FileSystem::FileExists(const char* path)
 
 	// stat file
 	struct stat sysStatData;
-	if (stat(path, &sysStatData) < 0)
+	if (lstat(path, &sysStatData) < 0)
 		return false;
 
 	if (S_ISDIR(sysStatData.st_mode))
@@ -2140,7 +2174,7 @@ bool FileSystem::DirectoryExists(const char* path)
 
 	// stat file
 	struct stat sysStatData;
-	if (stat(path, &sysStatData) < 0)
+	if (lstat(path, &sysStatData) < 0)
 		return false;
 
 	if (S_ISDIR(sysStatData.st_mode))
@@ -2190,7 +2224,7 @@ bool FileSystem::CreateDirectoryPath(const char* path, bool recursive, Error* er
 	{
 		// check the attributes
 		struct stat sysStatData;
-		if (stat(path, &sysStatData) == 0 && S_ISDIR(sysStatData.st_mode))
+		if (lstat(path, &sysStatData) == 0 && S_ISDIR(sysStatData.st_mode))
 			return true;
 	}
 
@@ -2260,7 +2294,7 @@ bool FileSystem::DeleteFilePath(const char* path, Error* error)
 	}
 
 	struct stat sysStatData;
-	if (stat(path, &sysStatData) != 0 || S_ISDIR(sysStatData.st_mode))
+	if (lstat(path, &sysStatData) != 0 || S_ISDIR(sysStatData.st_mode))
 	{
 		Error::SetStringView(error, "File does not exist.");
 		return false;
@@ -2300,7 +2334,7 @@ bool FileSystem::DeleteDirectory(const char* path)
 		return false;
 
 	struct stat sysStatData;
-	if (stat(path, &sysStatData) != 0 || !S_ISDIR(sysStatData.st_mode))
+	if (lstat(path, &sysStatData) != 0 || !S_ISDIR(sysStatData.st_mode))
 		return false;
 
 	return (rmdir(path) == 0);

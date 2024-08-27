@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2002-2023 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
+// SPDX-License-Identifier: GPL-3.0+
 
 #include <string>
 #include <algorithm>
@@ -53,6 +53,7 @@ static void parseDisasm(SymbolMap& map, const char* disasm, char* opcode, char* 
 		return;
 	}
 
+	char* arguments_start = arguments;
 	const char* jumpAddress = strstr(disasm,"->$");
 	const char* jumpRegister = strstr(disasm,"->");
 	while (*disasm != 0)
@@ -66,9 +67,9 @@ static void parseDisasm(SymbolMap& map, const char* disasm, char* opcode, char* 
 			const std::string addressSymbol = map.GetLabelName(branchTarget);
 			if (!addressSymbol.empty() && insertSymbols)
 			{
-				arguments += std::snprintf(arguments, arguments_size, "%s",addressSymbol.c_str());
+				arguments += std::snprintf(arguments, arguments_size - (arguments - arguments_start), "%s",addressSymbol.c_str());
 			} else {
-				arguments += std::snprintf(arguments, arguments_size, "0x%08X",branchTarget);
+				arguments += std::snprintf(arguments, arguments_size - (arguments - arguments_start), "0x%08X",branchTarget);
 			}
 
 			disasm += 3+2+8;

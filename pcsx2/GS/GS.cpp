@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2002-2023 PCSX2 Dev Team
-// SPDX-License-Identifier: LGPL-3.0+
+// SPDX-FileCopyrightText: 2002-2024 PCSX2 Dev Team
+// SPDX-License-Identifier: GPL-3.0+
 
 #include "Config.h"
 #include "Counters.h"
@@ -1053,18 +1053,15 @@ static void HotkeyAdjustUpscaleMultiplier(s32 delta)
 
 static void HotkeyToggleOSD()
 {
-	GSConfig.OsdShowMessages ^= EmuConfig.GS.OsdShowMessages;
-	GSConfig.OsdShowSpeed ^= EmuConfig.GS.OsdShowSpeed;
-	GSConfig.OsdShowFPS ^= EmuConfig.GS.OsdShowFPS;
-	GSConfig.OsdShowCPU ^= EmuConfig.GS.OsdShowCPU;
-	GSConfig.OsdShowGPU ^= EmuConfig.GS.OsdShowGPU;
-	GSConfig.OsdShowResolution ^= EmuConfig.GS.OsdShowResolution;
-	GSConfig.OsdShowGSStats ^= EmuConfig.GS.OsdShowGSStats;
-	GSConfig.OsdShowIndicators ^= EmuConfig.GS.OsdShowIndicators;
 	GSConfig.OsdShowSettings ^= EmuConfig.GS.OsdShowSettings;
 	GSConfig.OsdShowInputs ^= EmuConfig.GS.OsdShowInputs;
-	GSConfig.OsdShowFrameTimes ^= EmuConfig.GS.OsdShowFrameTimes;
-	GSConfig.OsdShowVersion ^= EmuConfig.GS.OsdShowVersion;
+	GSConfig.OsdShowInputRec ^= EmuConfig.GS.OsdShowInputRec;
+	GSConfig.OsdShowVideoCapture ^= EmuConfig.GS.OsdShowVideoCapture;
+
+	GSConfig.OsdMessagesPos =
+		GSConfig.OsdMessagesPos == OsdOverlayPos::None ? EmuConfig.GS.OsdMessagesPos : OsdOverlayPos::None;
+	GSConfig.OsdPerformancePos =
+		GSConfig.OsdPerformancePos == OsdOverlayPos::None ? EmuConfig.GS.OsdPerformancePos : OsdOverlayPos::None;
 }
 
 BEGIN_HOTKEY_LIST(g_gs_hotkeys){"Screenshot", TRANSLATE_NOOP("Hotkeys", "Graphics"),
@@ -1166,16 +1163,16 @@ BEGIN_HOTKEY_LIST(g_gs_hotkeys){"Screenshot", TRANSLATE_NOOP("Hotkeys", "Graphic
 				return;
 
 			static constexpr std::array<const char*, static_cast<int>(GSInterlaceMode::Count)> option_names = {{
-				"Automatic",
-				"Off",
-				"Weave (Top Field First)",
-				"Weave (Bottom Field First)",
-				"Bob (Top Field First)",
-				"Bob (Bottom Field First)",
-				"Blend (Top Field First)",
-				"Blend (Bottom Field First)",
-				"Adaptive (Top Field First)",
-				"Adaptive (Bottom Field First)",
+				TRANSLATE_NOOP("Hotkeys", "Automatic"),
+				TRANSLATE_NOOP("Hotkeys", "Off"),
+				TRANSLATE_NOOP("Hotkeys", "Weave (Top Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Weave (Bottom Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Bob (Top Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Bob (Bottom Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Blend (Top Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Blend (Bottom Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Adaptive (Top Field First)"),
+				TRANSLATE_NOOP("Hotkeys", "Adaptive (Bottom Field First)"),
 			}};
 
 			const GSInterlaceMode new_mode = static_cast<GSInterlaceMode>(
