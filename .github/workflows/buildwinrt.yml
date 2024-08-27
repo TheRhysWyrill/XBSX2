@@ -88,7 +88,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_release_tag: latest
           prerelease: false
-          title: Latest XBSX2 Builds
+          title: ${{ build.steps.extract_version.outputs.version }} Builds
           files: | 
             ./artifacts/appx-Release/*_x64.appx
             ./artifacts/appx-Release AVX2/*_x64_Release AVX2.appx
