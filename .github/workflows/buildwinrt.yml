@@ -77,6 +77,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version string from AppxManifest
+        id: extract_version
+        run: |
+          $manifest = [xml](Get-Content pcsx2-winrt\Package.appxmanifest)
+          $version = $manifest.Package.Identity.Version
+          echo $version
+          echo version=$version >> $env:GITHUB_OUTPUT
+        
+      - name: Echo the GitHub Env for File Names
+        run: |
+          echo "${{ steps.extract_version.outputs.version }}"        
+
       - name: Download Artifacts
         uses: actions/download-artifact@v4.1.7
         with:
@@ -88,7 +103,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_release_tag: latest
           prerelease: false
-          title: ${{ build.steps.extract_version.outputs.version }} Builds
+          title: ${{ steps.extract_version.outputs.version }} Builds
           files: | 
             ./artifacts/appx-Release/*_x64.appx
             ./artifacts/appx-Release AVX2/*_x64_Release AVX2.appx
