@@ -54,30 +54,20 @@ jobs:
     - name: Build the project
       run: | 
         msbuild PCSX2_qt.sln /m /p:PlatformToolset=v143 /p:AppxBundle=Always /t:Restore,Rebuild /p:Configuration="${{ matrix.configuration }}" /p:Platform=x64 /t:restore,build /p:RestorePackagesConfig=true
-
-    - name: Grab AppX package SSE4
-      shell: cmd
-      run: >
-        cd build\x64\Release && copy /B *x64.appx ..\xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
-
-    - name: Grab AppX package AVX2
-      shell: cmd
-      run: > 
-        cd "build\x64\Release AVX2" && copy /B *x64.appx ..\..\xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx 
         
     - name: Upload APPX file (SSE4)
       if: matrix.configuration == 'Release'
       uses: actions/upload-artifact@v4
       with:
         name: appx-${{ matrix.configuration }}
-        path: ./build/x64/Release/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
+        path: ./bin/xbsx2_${{ steps.extract_version.outputs.version }}_x64.appx
         
     - name: Upload APPX file (AVX2)
       if: matrix.configuration == 'Release AVX2'
       uses: actions/upload-artifact@v4
       with:
         name: appx-${{ matrix.configuration }}
-        path: ./build/x64/Release AVX2/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx
+        path: ./bin/xbsx2_${{ steps.extract_version.outputs.version }}_x64_Release AVX2.appx
   
   Publish-release:
     needs: build
